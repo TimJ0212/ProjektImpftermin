@@ -34,20 +34,4 @@ public class req {
 		return op;
 
 	}
-
-	public static String getImpfFrauen() throws Exception {
-		String uri = ("https://www.doctolib.de/availabilities.json?start_date=2021-05-22&visit_motive_ids=2738611&agenda_ids=448104&insurance_sector=public&practice_ids=122091&destroy_temporary=true&limit=4");
-
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(uri)).build();
-
-		HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-
-		String op = response.body();
-
-		Writer fw = new FileWriter("/Users/timjungk/eclipse-workspace/ProjektImpfen/log.txt", true);
-		fw.write("Frauenarzt: " + op + System.currentTimeMillis() + "\n");
-		fw.close();
-		return op;
-	}
 }
