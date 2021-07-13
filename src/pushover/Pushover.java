@@ -1,45 +1,47 @@
 package pushover;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.nio.charset.StandardCharsets;
 
 public class Pushover {
 
 	/**
 	 * App-Token
 	 */
-	private String appToken;
+	private final String appToken;
 
 	/**
 	 * User-Token
 	 */
-	private String userToken;
+	private final String userKey;
 
 	/**
 	 * Initialisiert ein Pushover Objekt
 	 *
-	 * @param appToken  
-	 * @param userToken
+	 * @param appToken Der App Token von Pushover
+	 * @param userKey  Der USer Key von Pushover
 	 */
-	public Pushover(String appToken, String userToken) {
+	public Pushover(String appToken, String userKey) {
 		this.appToken = appToken;
-		this.userToken = userToken;
+		this.userKey = userKey;
 	}
-	
+
 	/**
 	 * Sendet eine Nachricht
-	 * @param Nachricht
+	 *
+	 * @param message Versendete Nachricht
 	 */
-	public String sendMessage(String message) throws UnsupportedEncodingException, IOException {
-		return sendToPushoverRaw(getAuthenticationTokens() + "&message=" + URLEncoder.encode(message, "UTF-8"));
+	public String sendMessage(String message) throws IOException {
+		return sendToPushoverRaw(
+				getAuthenticationTokens() +
+						"&message=" +
+						URLEncoder.encode(message, StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -53,13 +55,13 @@ public class Pushover {
 	 * Liefert den User-Token
 	 */
 	private String getUserToken() {
-		return userToken;
+		return userKey;
 	}
 
 	/**
 	 * Liefert einen String der ertstellten Token
 	 */
-	private String getAuthenticationTokens() throws UnsupportedEncodingException {
+	private String getAuthenticationTokens() {
 
 		return "token=" + getAppToken() + "&user=" + getUserToken();
 	}
@@ -75,18 +77,16 @@ public class Pushover {
 		connection.setDoInput(true);
 
 		OutputStream outputStream = connection.getOutputStream();
-		outputStream.write(rawMessage.getBytes(Charset.forName("UTF-8")));
+		outputStream.write(rawMessage.getBytes(StandardCharsets.UTF_8));
 		outputStream.close();
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-		String output = "";
-		String outputCache = "";
-		while ((outputCache = br.readLine()) != null) {
-			output += outputCache;
-		}
+		StringBuilder output = new StringBuilder();
+		String outputCache;
+		while ((outputCache = br.readLine()) != null) output.append(outputCache);
 		br.close();
-		return output;
+		return output.toString();
 	}
 
 }
